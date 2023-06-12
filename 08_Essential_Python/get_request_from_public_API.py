@@ -29,5 +29,5 @@ df = pd.DataFrame(result, columns=["name", "genres", "language", "premiered", "e
 
 df
 
-# save as a csv file
+# export dataframe to csv
 df.to_csv("tvmazeapi.csv")
