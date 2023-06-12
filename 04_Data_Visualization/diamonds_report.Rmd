@@ -1,0 +1,152 @@
+---
+title: "Homework Data Viz"
+author: "Chanakan Pangpond"
+date: "2023-03-19"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Hello World
+
+This is markdown language. Today we learn a few topics in R.
+
+- databases
+- working with date
+- ggplot2
+- rmarkdown
+
+## Homework
+
+Explore dataframe 'diamonds' and create 5 visualizations.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+head(diamonds)
+```
+
+### Chart 1 - Relationship between carat and price
+
+Cut quality is used as a color variable. First, I will find the correlation between carat and price.
+
+```{r message=FALSE, warning=FALSE}
+cor(diamonds$price, diamonds$carat)
+
+set.seed(24)
+ggplot(diamonds %>% sample_n(5000),
+       aes(carat, price, col=cut)) +
+  geom_point(size=1, alpha=0.5) +
+  geom_smooth(method="lm", size=1) +
+  facet_wrap(~color, ncol=3) +
+  theme_minimal() +
+  labs(
+    x = "Carat",
+    y = "Price USD",
+    caption = "Data source: diamonds ggplot2"
+  )
+```
+
+We found a positive relationship between two variables - the greater the carat weight, the higher the price. The most dramatic increase can be seen in ideal and very good cut diamonds.
+
+### Chart 2: Proportion of color grades for each cut quality
+
+```{r message=FALSE, warning=FALSE}
+ggplot(diamonds, mapping = aes(cut, fill=color)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  labs(
+    x = "Cut",
+    y = "Proportion",
+    caption = "Data source: diamonds ggplot2"
+  ) 
+```
+
+Overall, diamonds in the color range D, I and J account for the smallest percentage with color J as the rarest group.
+
+### Chart 3: Distribution of colors and cut quality
+
+```{r message=FALSE, warning=FALSE}
+library(patchwork)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+ggplot(diamonds, mapping = aes(cut, fill = color)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  labs(
+    x = "Cut",
+    y = "Count",
+    caption = "Data source: diamonds ggplot2"
+  ) 
+```
+
+```{r message=FALSE, warning=FALSE}
+cut_color <- count(diamonds, cut, color)
+
+cut_color[cut_color$n == (min(cut_color$n)) |
+          cut_color$n == (max(cut_color$n)), ]
+```
+
+It can be seen that fair-cut, J-color is the smallest group (119 diamonds) while the figure for ideal-cut, G-color is the largest proportion at just under 5,000 diamonds.
+
+### Chart 4: Price distribution of diamonds
+
+Comparing one-carat diamonds
+
+```{r message=FALSE, warning=FALSE}
+diamonds_one_carat <- diamonds %>%
+  filter(carat == 1)
+
+diamonds_one_carat %>%
+  summarize(
+    n = n(),
+    min = min(price),
+    max = max(price)
+  )
+
+ggplot(diamonds_one_carat, aes(price)) +
+  geom_histogram(aes(fill = stat(count) >= 145), bins = 30, show.legend = FALSE) +
+  scale_fill_manual(values = c(`TRUE` = "purple4", `FALSE` = alpha("gray", 0.7))) +
+  stat_bin(
+    geom ="text", 
+    aes(label = after_stat(if_else (condition = count>= 145, as.character(count), ""))), 
+    vjust = -.5) + 
+  geom_rug() +
+  theme_minimal() +
+  labs(
+    x = "Price USD",
+    y = "Count",
+    subtitle = "Price distribution of one-carat diamonds"
+  )
+```
+
+The price of one-carat diamond ranges from $1,681 to $16,469. Approximately 65% of the diamonds cost between $3,750 and $6,250. 
+
+### Chart 5: Average price of diamonds for each clarity
+
+Comparing one-carat diamonds
+
+```{r message=FALSE, warning=FALSE}
+ggplot(diamonds_one_carat, aes(price, clarity, col=clarity)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "Price USD",
+    y = "Clarity",
+    subtitle = "Avarage price for each clarity",
+    caption = "Data source: diamonds ggplot2"
+  )
+```
+
+It can be seen from the box plots that price increases markedly with the clarity scale.
+
+*IF stands for 'Internally Flawless', therefore it is the best grade in this dataset. I1 stands for 'Included' which is the lowest quality.
+
+Reference:
+
+Read the full article here >>
+[What Is Diamond Clarity?](https://www.brilliantearth.com/diamond/buying-guide/clarity/)
+
+![Diamond Clarity Chart](https://www.datocms-assets.com/25216/1652905573-m-clarity-chart.jpg?q=25&auto=format&w=828)
