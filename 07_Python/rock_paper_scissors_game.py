@@ -68,3 +68,5 @@ If you want to end the game, type 'exit'.""")
         
         else:
             print("Invalid input. Please try again.")
+
+play_game()
